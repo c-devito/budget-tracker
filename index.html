@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --border2: #3a3a3a;
+    --text: #f0ede6;
+    --text2: #8a8680;
+    --text3: #5a5753;
+    --accent: #c8a96e;
+    --accent2: #8fb87a;
+    --danger: #c8706e;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+  }
+  .login-box {
+    width: 340px; padding: 48px 40px;
+    border: 1px solid var(--border2); border-radius: 4px;
+    background: var(--surface);
+  }
+  .login-box h1 { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--accent); margin-bottom: 6px; letter-spacing: 0.05em; }
+  .login-box p { font-size: 12px; color: var(--text3); margin-bottom: 32px; font-family: var(--mono); }
+  .login-box input {
+    width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 3px; color: var(--text); font-family: var(--mono); font-size: 14px;
+    margin-bottom: 12px; outline: none; letter-spacing: 0.1em;
+  }
+  .login-box input:focus { border-color: var(--accent); }
+  .login-box button {
+    width: 100%; padding: 11px; background: var(--accent); border: none; border-radius: 3px;
+    color: #0f0f0f; font-family: var(--mono); font-size: 13px; font-weight: 500;
+    cursor: pointer; letter-spacing: 0.05em; transition: opacity 0.15s;
+  }
+  .login-box button:hover { opacity: 0.85; }
+  .login-error { font-size: 12px; color: var(--danger); font-family: var(--mono); margin-top: 10px; text-align: center; }
+
+  /* APP SHELL */
+  #app { display: none; min-height: 100vh; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--border);
+    background: var(--surface); position: sticky; top: 0; z-index: 100;
+  }
+  .header-title { font-family: var(--mono); font-size: 15px; color: var(--accent); letter-spacing: 0.08em; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .logout-btn {
+    font-family: var(--mono); font-size: 11px; color: var(--text3); background: none;
+    border: 1px solid var(--border); border-radius: 3px; padding: 5px 12px;
+    cursor: pointer; letter-spacing: 0.05em; transition: color 0.15s, border-color 0.15s;
+  }
+  .logout-btn:hover { color: var(--text); border-color: var(--border2); }
+
+  /* NAV TABS */
+  nav {
+    display: flex; gap: 0; padding: 0 32px;
+    border-bottom: 1px solid var(--border); background: var(--surface);
+    overflow-x: auto;
+  }
+  nav button {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    padding: 14px 20px; background: none; border: none; border-bottom: 2px solid transparent;
+    color: var(--text3); cursor: pointer; white-space: nowrap; transition: color 0.15s, border-color 0.15s;
+    margin-bottom: -1px;
+  }
+  nav button:hover { color: var(--text2); }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MAIN */
+  main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+  /* CONTROLS BAR */
+  .controls {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 360px; }
+  .search-wrap input {
+    width: 100%; padding: 8px 12px 8px 36px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 3px; color: var(--text);
+    font-family: var(--sans); font-size: 13px; outline: none;
+  }
+  .search-wrap input:focus { border-color: var(--border2); }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; pointer-events: none; }
+  .filter-select {
+    padding: 8px 12px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 3px; color: var(--text2); font-family: var(--mono); font-size: 11px;
+    outline: none; cursor: pointer; letter-spacing: 0.04em;
+  }
+  .filter-select:focus { border-color: var(--border2); }
+  .row-count { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-left: auto; letter-spacing: 0.04em; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--surface2); }
+  th {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; font-weight: 500;
+    color: var(--text3); padding: 10px 14px; text-align: left; white-space: nowrap;
+    border-bottom: 1px solid var(--border); text-transform: uppercase;
+    cursor: pointer; user-select: none;
+  }
+  th:hover { color: var(--text2); }
+  th.sorted { color: var(--accent); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  td { padding: 9px 14px; color: var(--text2); white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+  td.date-col { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+  td.amount-col { font-family: var(--mono); font-size: 12px; }
+  td.amount-pos { color: var(--accent2); }
+  td.amount-neg { color: var(--danger); }
+  td.actions { white-space: nowrap; }
+  .edit-btn, .del-btn {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: 2px; cursor: pointer; border: 1px solid;
+    transition: opacity 0.15s; background: none;
+  }
+  .edit-btn { color: var(--accent); border-color: var(--accent); margin-right: 6px; }
+  .del-btn { color: var(--danger); border-color: var(--danger); }
+  .edit-btn:hover, .del-btn:hover { opacity: 0.6; }
+
+  /* LOADING / EMPTY */
+  .state-msg {
+    text-align: center; padding: 60px 20px;
+    font-family: var(--mono); font-size: 12px; color: var(--text3); letter-spacing: 0.06em;
+  }
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid var(--border2); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 10px; vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MONTHLY BREAKDOWN */
+  .breakdown-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 4px; }
+  .breakdown-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .breakdown-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; font-weight: 500; color: var(--text3); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface2); text-transform: uppercase; }
+  .breakdown-table td { padding: 9px 14px; color: var(--text2); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 12px; }
+  .breakdown-table tr:last-child td { border-bottom: none; }
+  .breakdown-table tr:hover td { background: var(--surface2); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 4px;
+    padding: 32px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
+  }
+  .modal h2 { font-family: var(--mono); font-size: 14px; color: var(--accent); margin-bottom: 24px; letter-spacing: 0.06em; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; }
+  .form-group input, .form-group select {
+    padding: 8px 12px; background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 3px; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+  .btn-cancel {
+    padding: 9px 20px; background: none; border: 1px solid var(--border2); border-radius: 3px;
+    color: var(--text2); font-family: var(--mono); font-size: 12px; cursor: pointer; letter-spacing: 0.04em;
+  }
+  .btn-cancel:hover { border-color: var(--border2); color: var(--text); }
+  .btn-save {
+    padding: 9px 20px; background: var(--accent); border: none; border-radius: 3px;
+    color: #0f0f0f; font-family: var(--mono); font-size: 12px; font-weight: 500; cursor: pointer; letter-spacing: 0.04em;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px; z-index: 300;
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px;
+    padding: 12px 20px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+    color: var(--text); transform: translateY(20px); opacity: 0;
+    transition: transform 0.2s, opacity 0.2s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--accent2); color: var(--accent2); }
+  .toast.error { border-color: var(--danger); color: var(--danger); }
+
+  @media (max-width: 640px) {
+    header, nav, main { padding-left: 16px; padding-right: 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>BUDGET_TRACKER</h1>
+    <p>// enter password to continue</p>
+    <input type="password" id="pw-input" placeholder="password" autocomplete="current-password" />
+    <button onclick="tryLogin()">ENTER</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <span class="header-title">BUDGET_TRACKER</span>
+    <div class="header-right">
+      <button class="logout-btn" onclick="logout()">LOGOUT</button>
+    </div>
+  </header>
+
+  <nav id="tab-nav"></nav>
+
+  <main id="main-content">
+    <div class="state-msg"><span class="spinner"></span> loading...</div>
+  </main>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h2>// EDIT TRANSACTION</h2>
+    <div class="form-grid" id="edit-form-grid"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
+      <button class="btn-save" onclick="saveEdit()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxo0e8lO7yj-khjETrJNberjWIKiDGKpFRbGbYXcYxxXS5SXiwXzysZEVTPpX2IVzt_7g/exec';
+const PASSWORD = 'Loup384!';
+const ACCOUNT_SHEETS = ['AMEX','CapitalOne','CareCreditCD','WFCheckingCD','WFCheckingNF','WFCredit','WFSavings'];
+const HEADERS = ['Date','Month','Detail','Deposits','Charges','Amount','Store','Category','Parent Category','Account Type','Account','Trans Type'];
+const NUMERIC_COLS = ['Deposits','Charges','Amount'];
+
+let currentTab = 'AMEX';
+let allRows = [];
+let editingRow = null;
+let sortCol = null;
+let sortDir = 1;
+
+// AUTH
+function tryLogin() {
+  const val = document.getElementById('pw-input').value;
+  if (val === PASSWORD) {
+    sessionStorage.setItem('bt_auth', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  } else {
+    document.getElementById('login-error').textContent = 'incorrect password';
+    document.getElementById('pw-input').value = '';
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+function logout() {
+  sessionStorage.removeItem('bt_auth');
+  location.reload();
+}
+
+if (sessionStorage.getItem('bt_auth') === '1') {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// INIT
+function initApp() {
+  buildTabs();
+  loadTab('AMEX');
+}
+
+function buildTabs() {
+  const nav = document.getElementById('tab-nav');
+  const tabs = [...ACCOUNT_SHEETS, 'MonthlyBreakdown'];
+  nav.innerHTML = tabs.map(t =>
+    `<button onclick="loadTab('${t}')" id="tab-${t}" class="${t === currentTab ? 'active' : ''}">${t}</button>`
+  ).join('');
+}
+
+function setActiveTab(name) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('tab-' + name);
+  if (el) el.classList.add('active');
+}
+
+// API CALL
+async function api(params) {
+  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+// LOAD TAB
+async function loadTab(name) {
+  currentTab = name;
+  sortCol = null; sortDir = 1;
+  setActiveTab(name);
+  showLoading();
+
+  if (name === 'MonthlyBreakdown') {
+    const data = await api({ action: 'getMonthlyBreakdown' });
+    renderBreakdown(data.rows || []);
+  } else {
+    const data = await api({ action: 'getTransactions', sheet: name });
+    allRows = data.rows || [];
+    renderTable(allRows);
+  }
+}
+
+function showLoading() {
+  document.getElementById('main-content').innerHTML = '<div class="state-msg"><span class="spinner"></span> loading...</div>';
+}
+
+// RENDER TRANSACTIONS TABLE
+function renderTable(rows) {
+  const main = document.getElementById('main-content');
+
+  // filter
+  const search = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
+  const catFilter = document.getElementById('cat-filter') ? document.getElementById('cat-filter').value : '';
+  let filtered = rows;
+  if (search) filtered = filtered.filter(r => HEADERS.some(h => String(r[h]).toLowerCase().includes(search)));
+  if (catFilter) filtered = filtered.filter(r => r['Category'] === catFilter);
+
+  // sort
+  if (sortCol) {
+    filtered = [...filtered].sort((a, b) => {
+      let av = a[sortCol], bv = b[sortCol];
+      if (NUMERIC_COLS.includes(sortCol)) { av = parseFloat(av) || 0; bv = parseFloat(bv) || 0; }
+      return av < bv ? -sortDir : av > bv ? sortDir : 0;
+    });
+  }
+
+  // get categories for filter
+  const cats = [...new Set(rows.map(r => r['Category']).filter(Boolean))].sort();
+  const catSelected = catFilter;
+
+  const visibleHeaders = ['Date','Detail','Deposits','Charges','Amount','Category','Store','Account'];
+
+  main.innerHTML = `
+    <div class="controls">
+      <div class="search-wrap">
+        <span class="search-icon">&#9906;</span>
+        <input type="text" id="search-input" placeholder="search transactions..." value="${search}" oninput="reRender()" />
+      </div>
+      <select class="filter-select" id="cat-filter" onchange="reRender()">
+        <option value="">all categories</option>
+        ${cats.map(c => `<option value="${c}" ${c === catSelected ? 'selected' : ''}>${c}</option>`).join('')}
+      </select>
+      <span class="row-count">${filtered.length} / ${rows.length} rows</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            ${visibleHeaders.map(h => `<th onclick="sortBy('${h}')" class="${sortCol === h ? 'sorted' : ''}">${h} ${sortCol === h ? (sortDir === 1 ? '↑' : '↓') : ''}</th>`).join('')}
+            <th>actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.length === 0 ? `<tr><td colspan="${visibleHeaders.length + 1}" class="state-msg">no transactions found</td></tr>` :
+            filtered.map(row => `
+              <tr>
+                <td class="date-col">${formatDate(row['Date'])}</td>
+                <td title="${row['Detail']}">${row['Detail'] || '—'}</td>
+                <td class="amount-col amount-pos">${row['Deposits'] ? fmt(row['Deposits']) : ''}</td>
+                <td class="amount-col amount-neg">${row['Charges'] ? fmt(row['Charges']) : ''}</td>
+                <td class="amount-col ${parseFloat(row['Amount']) >= 0 ? 'amount-pos' : 'amount-neg'}">${row['Amount'] !== '' ? fmt(row['Amount']) : ''}</td>
+                <td>${row['Category'] || '—'}</td>
+                <td title="${row['Store']}">${row['Store'] || '—'}</td>
+                <td>${row['Account'] || '—'}</td>
+                <td class="actions">
+                  <button class="edit-btn" onclick='openEdit(${JSON.stringify(row)})'>EDIT</button>
+                  <button class="del-btn" onclick="confirmDelete('${currentTab}', ${row._row})">DEL</button>
+                </td>
+              </tr>
+            `).join('')
+          }
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function reRender() { renderTable(allRows); }
+
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  reRender();
+}
+
+function fmt(val) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return val;
+  return '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatDate(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  if (isNaN(d)) return val;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+}
+
+// MONTHLY BREAKDOWN
+function renderBreakdown(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById('main-content').innerHTML = '<div class="state-msg">no data found</div>';
+    return;
+  }
+  const headers = rows[0];
+  const body = rows.slice(1);
+  document.getElementById('main-content').innerHTML = `
+    <div class="breakdown-table-wrap">
+      <table class="breakdown-table">
+        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${body.map(row => `<tr>${row.map(cell => `<td>${cell !== '' ? cell : '—'}</td>`).join('')}</tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// EDIT MODAL
+function openEdit(row) {
+  editingRow = row;
+  const grid = document.getElementById('edit-form-grid');
+  grid.innerHTML = HEADERS.map(h => `
+    <div class="form-group ${['Detail','Store'].includes(h) ? 'full' : ''}">
+      <label>${h}</label>
+      <input type="text" id="field-${h.replace(/\s/g,'_')}" value="${row[h] !== undefined ? String(row[h]).replace(/"/g,'&quot;') : ''}" />
+    </div>
+  `).join('');
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editingRow = null;
+}
+
+async function saveEdit() {
+  if (!editingRow) return;
+  const data = {};
+  HEADERS.forEach(h => {
+    data[h] = document.getElementById('field-' + h.replace(/\s/g,'_')).value;
+  });
+  try {
+    await api({ action: 'updateTransaction', sheet: currentTab, row: editingRow._row, data: JSON.stringify(data) });
+    closeModal();
+    showToast('transaction updated', 'success');
+    await loadTab(currentTab);
+  } catch(e) {
+    showToast('error saving — try again', 'error');
+  }
+}
+
+// DELETE
+async function confirmDelete(sheet, rowNum) {
+  if (!confirm('Delete this transaction? This cannot be undone.')) return;
+  try {
+    await api({ action: 'deleteTransaction', sheet, row: rowNum });
+    showToast('transaction deleted', 'success');
+    await loadTab(currentTab);
+  } catch(e) {
+    showToast('error deleting — try again', 'error');
+  }
+}
+
+// TOAST
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// Close modal on overlay click
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Auto-init if already authed
+if (sessionStorage.getItem('bt_auth') === '1') initApp();
+</script>
+</body>
+</html>
