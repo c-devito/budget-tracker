@@ -4,21 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Budget Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #222222;
-    --border: #2e2e2e;
-    --border2: #3a3a3a;
-    --text: #f0ede6;
-    --text2: #8a8680;
-    --text3: #5a5753;
-    --accent: #c8a96e;
-    --accent2: #8fb87a;
-    --danger: #c8706e;
-    --mono: 'DM Mono', monospace;
+    --bg: #fdf6f0;
+    --surface: #fff8f4;
+    --surface2: #fdeee4;
+    --border: #f0d9cc;
+    --border2: #e8c9b8;
+    --text: #4a3728;
+    --text2: #8a6555;
+    --text3: #b8937f;
+    --accent: #d4896a;
+    --accent2: #e8b89a;
+    --accent3: #c27055;
+    --blush: #f5c4ad;
+    --sage: #a8b89a;
+    --danger: #c47070;
+    --success: #7aab88;
+    --gold: #d4a96a;
+    --serif: 'Playfair Display', serif;
     --sans: 'DM Sans', sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,57 +32,57 @@
   /* LOGIN */
   #login-screen {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: var(--bg);
+    background: linear-gradient(135deg, #fdf0e8 0%, #fde8da 50%, #f8ddd0 100%);
   }
   .login-box {
-    width: 340px; padding: 48px 40px;
-    border: 1px solid var(--border2); border-radius: 4px;
-    background: var(--surface);
+    width: 360px; padding: 52px 44px;
+    border: 1px solid var(--border2); border-radius: 16px;
+    background: var(--surface); text-align: center;
+    box-shadow: 0 8px 40px rgba(212,137,106,0.12);
   }
-  .login-box h1 { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--accent); margin-bottom: 6px; letter-spacing: 0.05em; }
-  .login-box p { font-size: 12px; color: var(--text3); margin-bottom: 32px; font-family: var(--mono); }
+  .login-logo { font-family: var(--serif); font-size: 28px; color: var(--accent); margin-bottom: 6px; font-style: italic; }
+  .login-sub { font-size: 12px; color: var(--text3); margin-bottom: 36px; letter-spacing: 0.08em; text-transform: uppercase; }
   .login-box input {
-    width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border2);
-    border-radius: 3px; color: var(--text); font-family: var(--mono); font-size: 14px;
-    margin-bottom: 12px; outline: none; letter-spacing: 0.1em;
+    width: 100%; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 10px; color: var(--text); font-family: var(--sans); font-size: 14px;
+    margin-bottom: 14px; outline: none; text-align: center; letter-spacing: 0.12em;
   }
   .login-box input:focus { border-color: var(--accent); }
   .login-box button {
-    width: 100%; padding: 11px; background: var(--accent); border: none; border-radius: 3px;
-    color: #0f0f0f; font-family: var(--mono); font-size: 13px; font-weight: 500;
-    cursor: pointer; letter-spacing: 0.05em; transition: opacity 0.15s;
+    width: 100%; padding: 13px; background: var(--accent); border: none; border-radius: 10px;
+    color: #fff; font-family: var(--sans); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.2s; letter-spacing: 0.04em;
   }
-  .login-box button:hover { opacity: 0.85; }
-  .login-error { font-size: 12px; color: var(--danger); font-family: var(--mono); margin-top: 10px; text-align: center; }
+  .login-box button:hover { background: var(--accent3); }
+  .login-error { font-size: 12px; color: var(--danger); margin-top: 12px; }
 
-  /* APP SHELL */
+  /* APP */
   #app { display: none; min-height: 100vh; }
 
   header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 32px; border-bottom: 1px solid var(--border);
+    padding: 16px 32px; border-bottom: 1px solid var(--border);
     background: var(--surface); position: sticky; top: 0; z-index: 100;
   }
-  .header-title { font-family: var(--mono); font-size: 15px; color: var(--accent); letter-spacing: 0.08em; }
-  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-title { font-family: var(--serif); font-size: 20px; color: var(--accent); font-style: italic; }
   .logout-btn {
-    font-family: var(--mono); font-size: 11px; color: var(--text3); background: none;
-    border: 1px solid var(--border); border-radius: 3px; padding: 5px 12px;
-    cursor: pointer; letter-spacing: 0.05em; transition: color 0.15s, border-color 0.15s;
+    font-size: 12px; color: var(--text3); background: none;
+    border: 1px solid var(--border2); border-radius: 8px; padding: 6px 14px;
+    cursor: pointer; transition: all 0.15s; font-family: var(--sans);
   }
-  .logout-btn:hover { color: var(--text); border-color: var(--border2); }
+  .logout-btn:hover { color: var(--accent); border-color: var(--accent); }
 
-  /* NAV TABS */
+  /* TABS */
   nav {
-    display: flex; gap: 0; padding: 0 32px;
+    display: flex; padding: 0 32px;
     border-bottom: 1px solid var(--border); background: var(--surface);
-    overflow-x: auto;
+    overflow-x: auto; gap: 4px;
   }
   nav button {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
-    padding: 14px 20px; background: none; border: none; border-bottom: 2px solid transparent;
-    color: var(--text3); cursor: pointer; white-space: nowrap; transition: color 0.15s, border-color 0.15s;
-    margin-bottom: -1px;
+    font-family: var(--sans); font-size: 12px; font-weight: 500;
+    padding: 13px 18px; background: none; border: none; border-bottom: 2px solid transparent;
+    color: var(--text3); cursor: pointer; white-space: nowrap; transition: all 0.15s;
+    margin-bottom: -1px; letter-spacing: 0.03em;
   }
   nav button:hover { color: var(--text2); }
   nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -85,168 +90,184 @@
   /* MAIN */
   main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
 
-  /* CONTROLS BAR */
-  .controls {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 360px; }
+  /* CONTROLS */
+  .controls { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
   .search-wrap input {
-    width: 100%; padding: 8px 12px 8px 36px; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 3px; color: var(--text);
+    width: 100%; padding: 9px 14px 9px 38px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px; color: var(--text);
     font-family: var(--sans); font-size: 13px; outline: none;
   }
-  .search-wrap input:focus { border-color: var(--border2); }
-  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; pointer-events: none; }
+  .search-wrap input:focus { border-color: var(--accent2); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; }
   .filter-select {
-    padding: 8px 12px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 3px; color: var(--text2); font-family: var(--mono); font-size: 11px;
-    outline: none; cursor: pointer; letter-spacing: 0.04em;
+    padding: 9px 14px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text2); font-family: var(--sans); font-size: 12px;
+    outline: none; cursor: pointer;
   }
-  .filter-select:focus { border-color: var(--border2); }
-  .row-count { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-left: auto; letter-spacing: 0.04em; }
+  .row-count { font-size: 12px; color: var(--text3); margin-left: auto; }
 
   /* TABLE */
-  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 4px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead tr { background: var(--surface2); }
   th {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; font-weight: 500;
-    color: var(--text3); padding: 10px 14px; text-align: left; white-space: nowrap;
-    border-bottom: 1px solid var(--border); text-transform: uppercase;
-    cursor: pointer; user-select: none;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text3); padding: 11px 14px; text-align: left; white-space: nowrap;
+    border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
   }
   th:hover { color: var(--text2); }
   th.sorted { color: var(--accent); }
   tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--surface2); }
-  td { padding: 9px 14px; color: var(--text2); white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
-  td.date-col { font-family: var(--mono); font-size: 12px; color: var(--text3); }
-  td.amount-col { font-family: var(--mono); font-size: 12px; }
-  td.amount-pos { color: var(--accent2); }
+  tbody tr:hover { background: #fdf0e8; }
+  td { padding: 10px 14px; color: var(--text2); white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+  td.date-col { font-size: 12px; color: var(--text3); }
+  td.amount-pos { color: var(--success); font-weight: 500; }
   td.amount-neg { color: var(--danger); }
   td.actions { white-space: nowrap; }
   .edit-btn, .del-btn {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
-    padding: 4px 10px; border-radius: 2px; cursor: pointer; border: 1px solid;
-    transition: opacity 0.15s; background: none;
+    font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; border: 1px solid;
+    transition: all 0.15s; background: none; font-family: var(--sans);
   }
-  .edit-btn { color: var(--accent); border-color: var(--accent); margin-right: 6px; }
-  .del-btn { color: var(--danger); border-color: var(--danger); }
-  .edit-btn:hover, .del-btn:hover { opacity: 0.6; }
+  .edit-btn { color: var(--accent); border-color: var(--blush); margin-right: 6px; }
+  .edit-btn:hover { background: var(--surface2); }
+  .del-btn { color: var(--danger); border-color: #f0c8c8; }
+  .del-btn:hover { background: #fdf0f0; }
 
-  /* LOADING / EMPTY */
-  .state-msg {
-    text-align: center; padding: 60px 20px;
-    font-family: var(--mono); font-size: 12px; color: var(--text3); letter-spacing: 0.06em;
-  }
+  /* STATE */
+  .state-msg { text-align: center; padding: 60px 20px; font-size: 13px; color: var(--text3); }
   .spinner {
-    display: inline-block; width: 18px; height: 18px;
+    display: inline-block; width: 20px; height: 20px;
     border: 2px solid var(--border2); border-top-color: var(--accent);
-    border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 10px; vertical-align: middle;
+    border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; vertical-align: middle;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* MONTHLY BREAKDOWN */
-  .breakdown-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 4px; }
-  .breakdown-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .breakdown-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; font-weight: 500; color: var(--text3); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface2); text-transform: uppercase; }
-  .breakdown-table td { padding: 9px 14px; color: var(--text2); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 12px; }
-  .breakdown-table tr:last-child td { border-bottom: none; }
-  .breakdown-table tr:hover td { background: var(--surface2); }
+  /* DASHBOARD */
+  .dash-section-title {
+    font-family: var(--serif); font-size: 18px; color: var(--text); margin-bottom: 16px; font-style: italic;
+  }
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .summary-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .summary-card .card-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .summary-card .card-value { font-family: var(--serif); font-size: 22px; color: var(--text); }
+  .summary-card .card-budget { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .summary-card.highlight { background: linear-gradient(135deg, #fdeee4, #fdf6f0); border-color: var(--accent2); }
+  .summary-card .card-value.positive { color: var(--success); }
+  .summary-card .card-value.negative { color: var(--danger); }
+  .summary-card .card-value.neutral { color: var(--accent); }
+
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  @media (max-width: 800px) { .dash-grid { grid-template-columns: 1fr; } }
+
+  .dash-panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .dash-panel h3 { font-family: var(--serif); font-size: 15px; color: var(--text); margin-bottom: 14px; font-style: italic; }
+  .dash-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .dash-row:last-child { border-bottom: none; }
+  .dash-row-label { color: var(--text2); }
+  .dash-row-value { font-weight: 500; color: var(--text); }
+  .dash-row-budget { font-size: 11px; color: var(--text3); margin-left: 8px; }
+  .over-budget { color: var(--danger) !important; }
+  .under-budget { color: var(--success) !important; }
+
+  .bar-wrap { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .bar-bg { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.4s; }
+  .bar-fill.over { background: var(--danger); }
 
   /* MODAL */
   .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: none; position: fixed; inset: 0; background: rgba(74,55,40,0.4);
     z-index: 200; align-items: center; justify-content: center;
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--surface); border: 1px solid var(--border2); border-radius: 4px;
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 16px;
     padding: 32px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 12px 48px rgba(212,137,106,0.18);
   }
-  .modal h2 { font-family: var(--mono); font-size: 14px; color: var(--accent); margin-bottom: 24px; letter-spacing: 0.06em; }
+  .modal h2 { font-family: var(--serif); font-size: 20px; color: var(--accent); margin-bottom: 24px; font-style: italic; }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .form-group { display: flex; flex-direction: column; gap: 6px; }
   .form-group.full { grid-column: 1 / -1; }
-  .form-group label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; }
+  .form-group label { font-size: 11px; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
   .form-group input, .form-group select {
-    padding: 8px 12px; background: var(--bg); border: 1px solid var(--border2);
-    border-radius: 3px; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none;
+    padding: 9px 12px; background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 8px; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none;
   }
   .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
   .btn-cancel {
-    padding: 9px 20px; background: none; border: 1px solid var(--border2); border-radius: 3px;
-    color: var(--text2); font-family: var(--mono); font-size: 12px; cursor: pointer; letter-spacing: 0.04em;
+    padding: 10px 22px; background: none; border: 1px solid var(--border2); border-radius: 10px;
+    color: var(--text2); font-family: var(--sans); font-size: 13px; cursor: pointer;
   }
-  .btn-cancel:hover { border-color: var(--border2); color: var(--text); }
+  .btn-cancel:hover { border-color: var(--accent2); }
   .btn-save {
-    padding: 9px 20px; background: var(--accent); border: none; border-radius: 3px;
-    color: #0f0f0f; font-family: var(--mono); font-size: 12px; font-weight: 500; cursor: pointer; letter-spacing: 0.04em;
+    padding: 10px 22px; background: var(--accent); border: none; border-radius: 10px;
+    color: #fff; font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer;
   }
-  .btn-save:hover { opacity: 0.85; }
+  .btn-save:hover { background: var(--accent3); }
 
   /* TOAST */
   .toast {
     position: fixed; bottom: 28px; right: 28px; z-index: 300;
-    background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px;
-    padding: 12px 20px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
-    color: var(--text); transform: translateY(20px); opacity: 0;
-    transition: transform 0.2s, opacity 0.2s; pointer-events: none;
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 10px;
+    padding: 12px 22px; font-size: 13px; color: var(--text);
+    transform: translateY(20px); opacity: 0; transition: transform 0.2s, opacity 0.2s; pointer-events: none;
+    box-shadow: 0 4px 20px rgba(212,137,106,0.15);
   }
   .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.success { border-color: var(--accent2); color: var(--accent2); }
+  .toast.success { border-color: var(--success); color: var(--success); }
   .toast.error { border-color: var(--danger); color: var(--danger); }
 
   @media (max-width: 640px) {
     header, nav, main { padding-left: 16px; padding-right: 16px; }
     .form-grid { grid-template-columns: 1fr; }
+    .summary-cards { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <h1>BUDGET_TRACKER</h1>
-    <p>// enter password to continue</p>
-    <input type="password" id="pw-input" placeholder="password" autocomplete="current-password" />
-    <button onclick="tryLogin()">ENTER</button>
+    <div class="login-logo">Budget Tracker</div>
+    <div class="login-sub">personal finance</div>
+    <input type="password" id="pw-input" placeholder="••••••••" autocomplete="current-password" />
+    <button onclick="tryLogin()">Enter</button>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <header>
-    <span class="header-title">BUDGET_TRACKER</span>
-    <div class="header-right">
-      <button class="logout-btn" onclick="logout()">LOGOUT</button>
-    </div>
+    <span class="header-title">Budget Tracker</span>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
   </header>
-
   <nav id="tab-nav"></nav>
-
   <main id="main-content">
-    <div class="state-msg"><span class="spinner"></span> loading...</div>
+    <div class="state-msg"><span class="spinner"></span> Loading...</div>
   </main>
 </div>
 
-<!-- EDIT MODAL -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal">
-    <h2>// EDIT TRANSACTION</h2>
+    <h2>Edit Transaction</h2>
     <div class="form-grid" id="edit-form-grid"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
-      <button class="btn-save" onclick="saveEdit()">SAVE</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit()">Save changes</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -262,7 +283,6 @@ let editingRow = null;
 let sortCol = null;
 let sortDir = 1;
 
-// AUTH
 function tryLogin() {
   const val = document.getElementById('pw-input').value;
   if (val === PASSWORD) {
@@ -271,7 +291,7 @@ function tryLogin() {
     document.getElementById('app').style.display = 'block';
     initApp();
   } else {
-    document.getElementById('login-error').textContent = 'incorrect password';
+    document.getElementById('login-error').textContent = 'Incorrect password, try again.';
     document.getElementById('pw-input').value = '';
   }
 }
@@ -287,7 +307,6 @@ if (sessionStorage.getItem('bt_auth') === '1') {
   document.getElementById('app').style.display = 'block';
 }
 
-// INIT
 function initApp() {
   buildTabs();
   loadTab('AMEX');
@@ -297,7 +316,7 @@ function buildTabs() {
   const nav = document.getElementById('tab-nav');
   const tabs = [...ACCOUNT_SHEETS, 'MonthlyBreakdown'];
   nav.innerHTML = tabs.map(t =>
-    `<button onclick="loadTab('${t}')" id="tab-${t}" class="${t === currentTab ? 'active' : ''}">${t}</button>`
+    `<button onclick="loadTab('${t}')" id="tab-${t}" class="${t === currentTab ? 'active' : ''}">${t === 'MonthlyBreakdown' ? '✦ Overview' : t}</button>`
   ).join('');
 }
 
@@ -307,7 +326,6 @@ function setActiveTab(name) {
   if (el) el.classList.add('active');
 }
 
-// API CALL
 function api(params) {
   return new Promise((resolve, reject) => {
     const cbName = 'cb_' + Math.random().toString(36).slice(2);
@@ -324,16 +342,15 @@ function api(params) {
   });
 }
 
-// LOAD TAB
 async function loadTab(name) {
   currentTab = name;
   sortCol = null; sortDir = 1;
   setActiveTab(name);
-  showLoading();
+  document.getElementById('main-content').innerHTML = '<div class="state-msg"><span class="spinner"></span> Loading...</div>';
 
   if (name === 'MonthlyBreakdown') {
     const data = await api({ action: 'getMonthlyBreakdown' });
-    renderBreakdown(data.rows || []);
+    renderDashboard(data.rows || []);
   } else {
     const data = await api({ action: 'getTransactions', sheet: name });
     allRows = data.rows || [];
@@ -341,22 +358,13 @@ async function loadTab(name) {
   }
 }
 
-function showLoading() {
-  document.getElementById('main-content').innerHTML = '<div class="state-msg"><span class="spinner"></span> loading...</div>';
-}
-
-// RENDER TRANSACTIONS TABLE
 function renderTable(rows) {
   const main = document.getElementById('main-content');
-
-  // filter
   const search = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
   const catFilter = document.getElementById('cat-filter') ? document.getElementById('cat-filter').value : '';
   let filtered = rows;
   if (search) filtered = filtered.filter(r => HEADERS.some(h => String(r[h]).toLowerCase().includes(search)));
   if (catFilter) filtered = filtered.filter(r => r['Category'] === catFilter);
-
-  // sort
   if (sortCol) {
     filtered = [...filtered].sort((a, b) => {
       let av = a[sortCol], bv = b[sortCol];
@@ -364,159 +372,255 @@ function renderTable(rows) {
       return av < bv ? -sortDir : av > bv ? sortDir : 0;
     });
   }
-
-  // get categories for filter
   const cats = [...new Set(rows.map(r => r['Category']).filter(Boolean))].sort();
-  const catSelected = catFilter;
-
   const visibleHeaders = ['Date','Detail','Deposits','Charges','Amount','Category','Store','Account'];
 
   main.innerHTML = `
     <div class="controls">
       <div class="search-wrap">
         <span class="search-icon">&#9906;</span>
-        <input type="text" id="search-input" placeholder="search transactions..." value="${search}" oninput="reRender()" />
+        <input type="text" id="search-input" placeholder="Search transactions..." value="${search}" oninput="reRender()" />
       </div>
       <select class="filter-select" id="cat-filter" onchange="reRender()">
-        <option value="">all categories</option>
-        ${cats.map(c => `<option value="${c}" ${c === catSelected ? 'selected' : ''}>${c}</option>`).join('')}
+        <option value="">All categories</option>
+        ${cats.map(c => `<option value="${c}" ${c === catFilter ? 'selected' : ''}>${c}</option>`).join('')}
       </select>
-      <span class="row-count">${filtered.length} / ${rows.length} rows</span>
+      <span class="row-count">${filtered.length} of ${rows.length} transactions</span>
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            ${visibleHeaders.map(h => `<th onclick="sortBy('${h}')" class="${sortCol === h ? 'sorted' : ''}">${h} ${sortCol === h ? (sortDir === 1 ? '↑' : '↓') : ''}</th>`).join('')}
-            <th>actions</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          ${visibleHeaders.map(h => `<th onclick="sortBy('${h}')" class="${sortCol===h?'sorted':''}">${h}${sortCol===h?(sortDir===1?' ↑':' ↓'):''}</th>`).join('')}
+          <th>Actions</th>
+        </tr></thead>
         <tbody>
-          ${filtered.length === 0 ? `<tr><td colspan="${visibleHeaders.length + 1}" class="state-msg">no transactions found</td></tr>` :
-            filtered.map(row => `
+          ${filtered.length === 0
+            ? `<tr><td colspan="${visibleHeaders.length+1}" class="state-msg">No transactions found</td></tr>`
+            : filtered.map(row => `
               <tr>
                 <td class="date-col">${formatDate(row['Date'])}</td>
-                <td title="${row['Detail']}">${row['Detail'] || '—'}</td>
-                <td class="amount-col amount-pos">${row['Deposits'] ? fmt(row['Deposits']) : ''}</td>
-                <td class="amount-col amount-neg">${row['Charges'] ? fmt(row['Charges']) : ''}</td>
-                <td class="amount-col ${parseFloat(row['Amount']) >= 0 ? 'amount-pos' : 'amount-neg'}">${row['Amount'] !== '' ? fmt(row['Amount']) : ''}</td>
-                <td>${row['Category'] || '—'}</td>
-                <td title="${row['Store']}">${row['Store'] || '—'}</td>
-                <td>${row['Account'] || '—'}</td>
+                <td title="${row['Detail']}">${row['Detail']||'—'}</td>
+                <td class="${row['Deposits']?'amount-pos':''}">${row['Deposits']?fmt(row['Deposits']):''}</td>
+                <td class="${row['Charges']?'amount-neg':''}">${row['Charges']?fmt(row['Charges']):''}</td>
+                <td class="${parseFloat(row['Amount'])>=0?'amount-pos':'amount-neg'}">${row['Amount']!==''?fmt(row['Amount']):''}</td>
+                <td>${row['Category']||'—'}</td>
+                <td title="${row['Store']}">${row['Store']||'—'}</td>
+                <td>${row['Account']||'—'}</td>
                 <td class="actions">
-                  <button class="edit-btn" onclick='openEdit(${JSON.stringify(row)})'>EDIT</button>
-                  <button class="del-btn" onclick="confirmDelete('${currentTab}', ${row._row})">DEL</button>
+                  <button class="edit-btn" onclick='openEdit(${JSON.stringify(row)})'>Edit</button>
+                  <button class="del-btn" onclick="confirmDelete('${currentTab}',${row._row})">Delete</button>
                 </td>
-              </tr>
-            `).join('')
-          }
+              </tr>`).join('')}
         </tbody>
       </table>
-    </div>
-  `;
+    </div>`;
 }
 
 function reRender() { renderTable(allRows); }
-
 function sortBy(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = 1; }
+  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
   reRender();
 }
 
 function fmt(val) {
   const n = parseFloat(val);
   if (isNaN(n)) return val;
-  return '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
-
 function formatDate(val) {
   if (!val) return '—';
   const d = new Date(val);
   if (isNaN(d)) return val;
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+  return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'});
 }
 
-// MONTHLY BREAKDOWN
-function renderBreakdown(rows) {
-  if (!rows || rows.length === 0) {
-    document.getElementById('main-content').innerHTML = '<div class="state-msg">no data found</div>';
+// DASHBOARD
+function renderDashboard(rows) {
+  if (!rows || rows.length < 3) {
+    document.getElementById('main-content').innerHTML = '<div class="state-msg">No overview data found.</div>';
     return;
   }
-  const headers = rows[0];
-  const body = rows.slice(1);
-  document.getElementById('main-content').innerHTML = `
-    <div class="breakdown-table-wrap">
-      <table class="breakdown-table">
-        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-        <tbody>
-          ${body.map(row => `<tr>${row.map(cell => `<td>${cell !== '' ? cell : '—'}</td>`).join('')}</tr>`).join('')}
-        </tbody>
-      </table>
+
+  // Parse key values from known row positions
+  // Row 0: headers row (Cash Flow, Overview...)
+  // Row 1: Budget/Actual sub-headers
+  // Row 2: Starting
+  // Row 3: Income
+  // Row 4: Bills
+  // Row 5: Expenses
+  // Row 6: Debt
+  // Row 7: Savings
+  // Row 9: section headers (Income, Bills, Expenses...)
+  // Row 10+: data rows
+
+  function getVal(row, col) {
+    return (rows[row] && rows[row][col] !== undefined && rows[row][col] !== '') ? rows[row][col] : null;
+  }
+
+  const starting = { budget: getVal(2,1), actual: getVal(2,2) };
+  const income =   { budget: getVal(3,1), actual: getVal(3,2) };
+  const bills =    { budget: getVal(4,1), actual: getVal(4,2) };
+  const expenses = { budget: getVal(5,1), actual: getVal(5,2) };
+  const savings =  { budget: getVal(7,1), actual: getVal(7,2) };
+
+  // Parse expenses by subcategory (col 15-16 in the sheet, rows 10+)
+  const subcats = [];
+  for (let i = 10; i < rows.length; i++) {
+    const label = rows[i][15];
+    const val = rows[i][16];
+    if (label && val !== '' && val !== undefined && !isNaN(parseFloat(val))) {
+      subcats.push({ label, val: parseFloat(val) });
+    }
+  }
+  subcats.sort((a,b) => b.val - a.val);
+  const topSubcats = subcats.slice(0, 12);
+
+  // Parse bills (cols 4-8, rows 10+)
+  const billsList = [];
+  for (let i = 10; i < rows.length; i++) {
+    const name = rows[i][5];
+    const due = rows[i][6];
+    const budget = rows[i][7];
+    const actual = rows[i][8];
+    if (name && budget !== '' && budget !== undefined) {
+      billsList.push({ name, due, budget: parseFloat(budget)||0, actual: parseFloat(actual)||0 });
+    }
+  }
+
+  // Parse income (cols 0-2, rows 10+)
+  const incomeList = [];
+  for (let i = 10; i < rows.length; i++) {
+    const name = rows[i][0];
+    const budget = rows[i][1];
+    const actual = rows[i][2];
+    if (name && name !== 'Total' && budget !== '' && budget !== undefined && !isNaN(parseFloat(budget))) {
+      incomeList.push({ name, budget: parseFloat(budget)||0, actual: parseFloat(actual)||0 });
+    }
+  }
+
+  const maxSubcat = topSubcats.length ? topSubcats[0].val : 1;
+
+  const main = document.getElementById('main-content');
+  main.innerHTML = `
+    <p class="dash-section-title">Cash Flow Overview</p>
+    <div class="summary-cards">
+      <div class="summary-card highlight">
+        <div class="card-label">Starting Balance</div>
+        <div class="card-value neutral">${fmt(starting.actual || starting.budget || 0)}</div>
+      </div>
+      <div class="summary-card">
+        <div class="card-label">Total Income</div>
+        <div class="card-value positive">${fmt(income.actual || 0)}</div>
+        <div class="card-budget">Budget: ${fmt(income.budget || 0)}</div>
+      </div>
+      <div class="summary-card">
+        <div class="card-label">Total Bills</div>
+        <div class="card-value ${parseFloat(bills.actual) > parseFloat(bills.budget) ? 'negative' : 'negative'}">${fmt(bills.actual || 0)}</div>
+        <div class="card-budget">Budget: ${fmt(bills.budget || 0)}</div>
+      </div>
+      <div class="summary-card">
+        <div class="card-label">Total Expenses</div>
+        <div class="card-value negative">${fmt(expenses.actual || 0)}</div>
+        <div class="card-budget">Budget: ${fmt(expenses.budget || 0)}</div>
+      </div>
+      <div class="summary-card highlight">
+        <div class="card-label">Savings</div>
+        <div class="card-value positive">${fmt(savings.actual || 0)}</div>
+        <div class="card-budget">Goal: ${fmt(savings.budget || 0)}</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-panel">
+        <h3>Income Sources</h3>
+        ${incomeList.length === 0 ? '<p style="color:var(--text3);font-size:13px;">No income data found.</p>' :
+          incomeList.map(item => `
+            <div class="dash-row">
+              <span class="dash-row-label">${item.name}</span>
+              <span>
+                <span class="dash-row-value">${fmt(item.actual)}</span>
+                <span class="dash-row-budget">/ ${fmt(item.budget)}</span>
+              </span>
+            </div>`).join('')}
+      </div>
+
+      <div class="dash-panel">
+        <h3>Bills</h3>
+        ${billsList.length === 0 ? '<p style="color:var(--text3);font-size:13px;">No bills data found.</p>' :
+          billsList.map(item => `
+            <div class="dash-row">
+              <span class="dash-row-label">${item.name}${item.due ? ` <span style="font-size:11px;color:var(--text3);">due ${item.due}</span>` : ''}</span>
+              <span>
+                <span class="dash-row-value">${fmt(item.actual)}</span>
+                <span class="dash-row-budget">/ ${fmt(item.budget)}</span>
+              </span>
+            </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="dash-panel">
+      <h3>Spending by Category</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
+        ${topSubcats.map(item => `
+          <div style="padding: 8px 0; border-bottom: 1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:13px;color:var(--text2);">${item.label}</span>
+              <span style="font-size:13px;font-weight:500;color:var(--text);">${fmt(item.val)}</span>
+            </div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill ${item.val > 1000 ? 'over' : ''}" style="width:${Math.min(100, (item.val/maxSubcat)*100).toFixed(1)}%"></div></div>
+            </div>
+          </div>`).join('')}
+      </div>
     </div>
   `;
 }
 
-// EDIT MODAL
+// MODAL
 function openEdit(row) {
   editingRow = row;
-  const grid = document.getElementById('edit-form-grid');
-  grid.innerHTML = HEADERS.map(h => `
+  document.getElementById('edit-form-grid').innerHTML = HEADERS.map(h => `
     <div class="form-group ${['Detail','Store'].includes(h) ? 'full' : ''}">
       <label>${h}</label>
       <input type="text" id="field-${h.replace(/\s/g,'_')}" value="${row[h] !== undefined ? String(row[h]).replace(/"/g,'&quot;') : ''}" />
-    </div>
-  `).join('');
+    </div>`).join('');
   document.getElementById('edit-modal').classList.add('open');
 }
-
 function closeModal() {
   document.getElementById('edit-modal').classList.remove('open');
   editingRow = null;
 }
-
 async function saveEdit() {
   if (!editingRow) return;
   const data = {};
-  HEADERS.forEach(h => {
-    data[h] = document.getElementById('field-' + h.replace(/\s/g,'_')).value;
-  });
+  HEADERS.forEach(h => { data[h] = document.getElementById('field-' + h.replace(/\s/g,'_')).value; });
   try {
     await api({ action: 'updateTransaction', sheet: currentTab, row: editingRow._row, data: JSON.stringify(data) });
     closeModal();
-    showToast('transaction updated', 'success');
+    showToast('Transaction updated ✓', 'success');
     await loadTab(currentTab);
-  } catch(e) {
-    showToast('error saving — try again', 'error');
-  }
+  } catch(e) { showToast('Error saving — please try again', 'error'); }
 }
-
-// DELETE
 async function confirmDelete(sheet, rowNum) {
   if (!confirm('Delete this transaction? This cannot be undone.')) return;
   try {
     await api({ action: 'deleteTransaction', sheet, row: rowNum });
-    showToast('transaction deleted', 'success');
+    showToast('Transaction deleted', 'success');
     await loadTab(currentTab);
-  } catch(e) {
-    showToast('error deleting — try again', 'error');
-  }
+  } catch(e) { showToast('Error deleting — please try again', 'error'); }
 }
 
-// TOAST
-function showToast(msg, type = '') {
+function showToast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
   setTimeout(() => t.className = 'toast', 3000);
 }
 
-// Close modal on overlay click
 document.getElementById('edit-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
 
-// Auto-init if already authed
 if (sessionStorage.getItem('bt_auth') === '1') initApp();
 </script>
 </body>
