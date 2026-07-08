@@ -320,6 +320,21 @@ const PASSWORD = 'Loup384!';
 const ACCOUNT_SHEETS = ['AMEX','CapitalOne','CareCreditCD','WFCheckingCD','WFCheckingNF','WFCredit','WFSavings'];
 const HEADERS = ['Date','Month','Detail','Deposits','Charges','Amount','Store','Category','Parent Category','Account Type','Account','Trans Type'];
 
+let debtData = [];
+
+async function loadDebtInfo() {
+  try {
+    const data = await api({ action: 'getDebtInfo' });
+    if (data.rows && data.rows.length > 1) {
+      debtData = data.rows.slice(1).map(row => ({
+        name: row[0],
+        debt: row[1] === 'n/a' || row[1] === '' ? 0 : parseFloat(row[1]) || 0,
+        limit: parseFloat(String(row[2]).replace(/[$,]/g,'')) || 0
+      })).filter(r => r.name);
+    }
+  } catch(e) { console.log('Could not load debt info'); }
+}
+
 // Bills from your setup sheet
 const BILLS = [
   { name: 'Drex', amount: 10.66, due: '3rd', autopay: 'WF Debit' },
@@ -378,12 +393,13 @@ function api(params) {
     window[cbName] = (data) => { delete window[cbName]; document.body.removeChild(script); resolve(data); };
     script.onerror = () => { delete window[cbName]; document.body.removeChild(script); reject(new Error('Failed')); };
     document.body.appendChild(script);
-  });
+  });renderOverview
 }
 
 // LOAD ALL DATA
 async function initApp() {
   showLoadingBadge('Loading all accounts...');
+  await loadDebtInfo();
   document.getElementById('main-content').innerHTML = '<div class="state-msg"><span class="spinner"></span> Loading your data — fetching all accounts, this may take 10–20 seconds...</div>';
   try {
     const results = await Promise.all(ACCOUNT_SHEETS.map(s => api({ action: 'getTransactions', sheet: s })));
@@ -579,7 +595,30 @@ function renderOverview() {
             </div>`).join('')}
       </div>
     </div>
-
+<div class="dash-panel" style="margin-bottom:24px;">
+      <h3>Debt Overview</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 32px;">
+        ${debtData.map(card => {
+          const pct = card.limit ? Math.min(100, (card.debt / card.limit) * 100) : 0;
+          const color = pct > 70 ? 'var(--danger)' : pct > 40 ? 'var(--gold, #d4a96a)' : 'var(--success)';
+          return `
+            <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:13px;color:var(--text2);">${card.name}</span>
+                <span style="font-size:13px;font-weight:500;color:var(--text);">${card.debt > 0 ? fmt(card.debt) : '—'} <span style="font-size:11px;color:var(--text3);">/ ${fmt(card.limit)}</span></span>
+              </div>
+              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;">
+                <div style="height:100%;width:${pct.toFixed(1)}%;background:${color};border-radius:3px;transition:width 0.5s;"></div>
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-top:3px;">${pct.toFixed(0)}% utilized</div>
+            </div>`;
+        }).join('')}
+        <div style="padding:10px 0;grid-column:1/-1;display:flex;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:500;color:var(--text);">Total Debt</span>
+          <span style="font-size:13px;font-weight:500;color:var(--danger);">${fmt(debtData.reduce((s,c)=>s+c.debt,0))}</span>
+        </div>
+      </div>
+    </div>
     <div class="dash-panel" style="margin-bottom:24px;">
       <h3>Bills Tracker</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 32px;">
