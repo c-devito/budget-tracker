@@ -1,0 +1,105 @@
+const SHEET_ID = '1TyZIZr3b6UeKSz-kcmKXrS_8XMSbq-T9WKVHNEGpZYw';
+const ACCOUNT_SHEETS = ['AMEX','CapitalOne','CareCreditCD','WFCheckingCD','WFCheckingNF','WFCredit','WFSavings'];
+const HEADERS = ['Date','Month','Detail','Deposits','Charges','Amount','Store','Category','Parent Category','Account Type','Account','Trans Type'];
+
+function doGet(e) {
+  return handleRequest(e);
+}
+
+function doPost(e) {
+  return handleRequest(e);
+}
+
+function handleRequest(e) {
+  const params = e.parameter;
+  const action = params.action;
+  let result;
+
+  try {
+    if (action === 'getTransactions') {
+      result = getTransactions(params.sheet);
+    } else if (action === 'updateTransaction') {
+      result = updateTransaction(params.sheet, parseInt(params.row), JSON.parse(params.data));
+    } else if (action === 'deleteTransaction') {
+      result = deleteTransaction(params.sheet, parseInt(params.row));
+    } else if (action === 'getMonthlyBreakdown') {
+      result = getMonthlyBreakdown();
+    } else if (action === 'getSheets') {
+      result = { sheets: ACCOUNT_SHEETS };
+    } else if (action === 'getDebtInfo') {
+      result = getDebtInfo();
+    } else {
+      result = { error: 'Unknown action' };
+    }
+  } catch (err) {
+    result = { error: err.message };
+  }
+
+  const callback = e.parameter.callback;
+const output = JSON.stringify(result);
+
+if (callback) {
+  return ContentService
+    .createTextOutput(callback + '(' + output + ')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+} else 
+  return ContentService
+    .createTextOutput(output)
+    .setMimeType(ContentService.MimeType.JSON);
+
+
+}
+
+
+function getTransactions(sheetName) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return { error: 'Sheet not found: ' + sheetName };
+
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return { rows: [] };
+
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = {};
+    HEADERS.forEach((h, j) => { row[h] = data[i][j] !== undefined ? data[i][j] : ''; });
+    row._row = i + 1;
+    rows.push(row);
+  }
+  return { rows };
+}
+
+function updateTransaction(sheetName, rowNum, data) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return { error: 'Sheet not found' };
+
+  const values = HEADERS.map(h => data[h] !== undefined ? data[h] : '');
+  sheet.getRange(rowNum, 1, 1, values.length).setValues([values]);
+  return { success: true };
+}
+
+function deleteTransaction(sheetName, rowNum) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return { error: 'Sheet not found' };
+
+  sheet.deleteRow(rowNum);
+  return { success: true };
+}
+
+function getMonthlyBreakdown() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName('MonthlyBreakdown');
+  if (!sheet) return { error: 'MonthlyBreakdown sheet not found' };
+
+  const data = sheet.getDataRange().getValues();
+  return { rows: data };
+}
+function getDebtInfo() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName('SetUp');
+  if (!sheet) return { error: 'SetUp sheet not found' };
+  const data = sheet.getRange('M1:O7').getValues();
+  return { rows: data };
+}
