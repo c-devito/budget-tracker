@@ -318,9 +318,10 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxo0e8lO7yj-khjETrJNberjWIKiDGKpFRbGbYXcYxxXS5SXiwXzysZEVTPpX2IVzt_7g/exec';
 const PASSWORD = 'Loup384!';
 // Used only if the backend can't tell us the sheet list (see discoverSheets()).
-const FALLBACK_ACCOUNT_SHEETS = ['AMEX','CapitalOne','CareCreditCD','WFCheckingCD','WFCheckingNF','WFCredit','WFSavings'];
+// Matches every tab in the "2026 Budget" workbook except the config/summary ones below.
+const FALLBACK_ACCOUNT_SHEETS = ['Apple Card','AMEX','CapitalOne','CareCreditCD','CareCreditNF','WFCheckingCD','WFCheckingNF','WFCredit','WFSavings'];
 // Non-transaction tabs (config/debt/summary sheets) to skip even if the backend reports them.
-const EXCLUDE_SHEETS = ['DebtInfo','Debt Info','Setup','Bills','Summary'];
+const EXCLUDE_SHEETS = ['Bills Info','MonthlyBreakdown','SetUp'];
 const HEADERS = ['Date','Month','Detail','Deposits','Charges','Amount','Store','Category','Parent Category','Account Type','Account','Trans Type'];
 
 let debtData = [];
