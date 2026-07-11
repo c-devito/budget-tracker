@@ -513,16 +513,18 @@ function renderOverview() {
 
   const txns = getFilteredTxns();
   const income = txns.filter(t => parseFloat(t['Deposits']) > 0 && t['Trans Type'] !== 'Transfer');
-  const expenses = txns.filter(t => parseFloat(t['Charges']) > 0 && t['Trans Type'] === 'Expense');
+  // Charges is stored as a positive number on credit-card sheets but negative on the
+  // WF checking sheets, so compare/sum the absolute value rather than assuming a sign.
+  const expenses = txns.filter(t => t['Trans Type'] === 'Expense' && Math.abs(parseFloat(t['Charges'])||0) > 0);
   const totalIncome = income.reduce((s,t) => s + (parseFloat(t['Deposits'])||0), 0);
-  const totalExpenses = expenses.reduce((s,t) => s + (parseFloat(t['Charges'])||0), 0);
+  const totalExpenses = expenses.reduce((s,t) => s + Math.abs(parseFloat(t['Charges'])||0), 0);
   const net = totalIncome - totalExpenses;
 
   // Spending by category
   const catMap = {};
   expenses.forEach(t => {
     const cat = t['Parent Category'] || t['Category'] || 'Other';
-    catMap[cat] = (catMap[cat]||0) + (parseFloat(t['Charges'])||0);
+    catMap[cat] = (catMap[cat]||0) + Math.abs(parseFloat(t['Charges'])||0);
   });
   const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
   const maxCat = cats.length ? cats[0][1] : 1;
@@ -531,7 +533,7 @@ function renderOverview() {
   const acctMap = {};
   expenses.forEach(t => {
     const acct = t['Account'] || 'Unknown';
-    acctMap[acct] = (acctMap[acct]||0) + (parseFloat(t['Charges'])||0);
+    acctMap[acct] = (acctMap[acct]||0) + Math.abs(parseFloat(t['Charges'])||0);
   });
   const accts = Object.entries(acctMap).sort((a,b)=>b[1]-a[1]);
   const maxAcct = accts.length ? accts[0][1] : 1;
