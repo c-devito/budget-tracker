@@ -317,10 +317,28 @@
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxo0e8lO7yj-khjETrJNberjWIKiDGKpFRbGbYXcYxxXS5SXiwXzysZEVTPpX2IVzt_7g/exec';
 const PASSWORD = 'Loup384!';
-const ACCOUNT_SHEETS = ['AMEX','CapitalOne','CareCreditCD','WFCheckingCD','WFCheckingNF','WFCredit','WFSavings'];
+// Used only if the backend can't tell us the sheet list (see discoverSheets()).
+const FALLBACK_ACCOUNT_SHEETS = ['AMEX','CapitalOne','CareCreditCD','WFCheckingCD','WFCheckingNF','WFCredit','WFSavings'];
+// Non-transaction tabs (config/debt/summary sheets) to skip even if the backend reports them.
+const EXCLUDE_SHEETS = ['DebtInfo','Debt Info','Setup','Bills','Summary'];
 const HEADERS = ['Date','Month','Detail','Deposits','Charges','Amount','Store','Category','Parent Category','Account Type','Account','Trans Type'];
 
 let debtData = [];
+
+// Ask the backend for every sheet/tab in the workbook so new cards don't need a code change.
+// Falls back to the hardcoded list if the backend doesn't support 'getSheetNames' yet.
+async function discoverSheets() {
+  try {
+    const data = await api({ action: 'getSheetNames' });
+    const names = data && (data.sheets || data.names || data.rows);
+    if (Array.isArray(names) && names.length) {
+      const flat = names.map(n => Array.isArray(n) ? n[0] : n).filter(Boolean);
+      const filtered = flat.filter(n => !EXCLUDE_SHEETS.includes(n));
+      if (filtered.length) return filtered;
+    }
+  } catch (e) { console.log('Backend does not support getSheetNames yet, using fallback list'); }
+  return FALLBACK_ACCOUNT_SHEETS;
+}
 
 async function loadDebtInfo() {
   try {
@@ -393,16 +411,17 @@ function api(params) {
     window[cbName] = (data) => { delete window[cbName]; document.body.removeChild(script); resolve(data); };
     script.onerror = () => { delete window[cbName]; document.body.removeChild(script); reject(new Error('Failed')); };
     document.body.appendChild(script);
-  });renderOverview
+  });
 }
 
 // LOAD ALL DATA
 async function initApp() {
   showLoadingBadge('Loading all accounts...');
   await loadDebtInfo();
+  const sheets = await discoverSheets();
   document.getElementById('main-content').innerHTML = '<div class="state-msg"><span class="spinner"></span> Loading your data — fetching all accounts, this may take 10–20 seconds...</div>';
   try {
-    const results = await Promise.all(ACCOUNT_SHEETS.map(s => api({ action: 'getTransactions', sheet: s })));
+    const results = await Promise.all(sheets.map(s => api({ action: 'getTransactions', sheet: s })));
     allTransactions = [];
     results.forEach(r => {
       if (r.rows) allTransactions = allTransactions.concat(r.rows);
