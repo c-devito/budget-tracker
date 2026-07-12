@@ -23,6 +23,16 @@
     --success: #7aab88;
     --sans: 'DM Sans', sans-serif;
     --serif: 'Playfair Display', serif;
+    /* Fixed categorical order (validated for CVD separation + contrast) */
+    --series-1: #2a78d6;
+    --series-2: #1baf7a;
+    --series-3: #eda100;
+    --series-4: #008300;
+    --series-5: #4a3aa7;
+    --series-6: #e34948;
+    --series-7: #e87ba4;
+    --series-8: #eb6834;
+    --series-other: #b8937f;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; min-height: 100vh; }
@@ -157,6 +167,39 @@
   .bar-bg { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
   .bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.5s ease; }
   .bar-fill.alt { background: linear-gradient(90deg, #b8d4c8, var(--success)); }
+
+  /* BY ACCOUNT / DONUT CHART */
+  .acct-panel-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+  .view-toggle-btn {
+    font-size: 12px; color: var(--text3); background: none; border: 1px solid var(--border2);
+    border-radius: 8px; padding: 6px 14px; cursor: pointer; font-family: var(--sans); transition: all 0.15s;
+  }
+  .view-toggle-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .donut-layout { display: flex; gap: 36px; flex-wrap: wrap; align-items: center; }
+  .donut-svg-wrap { position: relative; flex-shrink: 0; }
+  .donut-seg { cursor: pointer; transition: opacity 0.15s; }
+  .donut-seg:hover { opacity: 0.82; }
+  .donut-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    text-align: center; pointer-events: none;
+  }
+  .donut-center-value { font-family: var(--serif); font-size: 21px; color: var(--text); font-style: italic; }
+  .donut-center-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+  .donut-legend { flex: 1; min-width: 220px; display: flex; flex-direction: column; }
+  .legend-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .legend-row:last-child { border-bottom: none; }
+  .legend-swatch { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+  .legend-label { flex: 1; color: var(--text2); }
+  .legend-val { font-weight: 500; color: var(--text); }
+  .legend-pct { font-size: 11px; color: var(--text3); width: 40px; text-align: right; }
+  .chart-tooltip {
+    position: fixed; pointer-events: none; z-index: 400; background: var(--text); color: #fff;
+    font-size: 12px; padding: 8px 12px; border-radius: 8px; opacity: 0; transition: opacity 0.1s;
+    box-shadow: 0 4px 16px rgba(74,55,40,0.25); max-width: 200px;
+  }
+  .chart-tooltip.show { opacity: 1; }
+  .chart-tooltip .tt-val { font-weight: 600; margin-bottom: 2px; }
+  .acct-table-wrap { margin-top: 4px; }
 
   /* BILLS TRACKER */
   .bill-item {
@@ -294,6 +337,7 @@
   </header>
   <nav>
     <button id="tab-btn-overview" class="active" onclick="switchTab('overview')">✦ Overview</button>
+    <button id="tab-btn-byaccount" onclick="switchTab('byaccount')">By Account</button>
     <button id="tab-btn-transactions" onclick="switchTab('transactions')">Transactions</button>
   </nav>
   <main id="main-content">
@@ -381,6 +425,17 @@ let editingRow = null;
 let txnSearch = '';
 let txnAcctFilter = '';
 let txnCatFilter = '';
+let byAcctSelected = null;
+let byAcctViewMode = 'chart';
+
+// Fixed slot order so a category always wears the same color everywhere it appears
+// (identity, not rank). Anything not listed here (including "Other") falls back
+// to the muted swatch rather than inventing a 9th hue.
+const CATEGORY_COLOR_ORDER = ['Groceries','Dining','Transportation & Auto','Entertainment','Bills & Subscriptions','Housing & Living','Health & Wellness','Travel'];
+function categoryColor(cat) {
+  const idx = CATEGORY_COLOR_ORDER.indexOf(cat);
+  return idx === -1 ? 'var(--series-other)' : `var(--series-${idx+1})`;
+}
 
 // AUTH
 function tryLogin() {
@@ -502,15 +557,12 @@ function switchTab(tab) {
 
 function renderCurrentTab() {
   if (currentTab === 'overview') renderOverview();
+  else if (currentTab === 'byaccount') renderByAccount();
   else renderTransactions();
 }
 
 // OVERVIEW
 function renderOverview() {
-  const months = getMonthsInData();
-  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const fullMonthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
   const txns = getFilteredTxns();
   // Deposits/Charges are signed inconsistently between sheets (positive on credit
   // cards, negative on WF checking), but Amount is already normalized the same way
@@ -541,34 +593,8 @@ function renderOverview() {
   const accts = Object.entries(acctMap).sort((a,b)=>b[1]-a[1]);
   const maxAcct = accts.length ? accts[0][1] : 1;
 
-  // Date range label
-  const rangeLabel = filterStart && filterEnd
-    ? `${filterStart.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} — ${filterEnd.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`
-    : 'All time';
-
-  // Default custom range values for inputs
-  const startVal = filterStart ? filterStart.toISOString().slice(0,10) : '';
-  const endVal = filterEnd ? filterEnd.toISOString().slice(0,10) : '';
-
   document.getElementById('main-content').innerHTML = `
-    <div class="date-bar">
-      <span class="date-bar-label">Period:</span>
-      <div class="month-pills">
-        ${months.map(m => `
-          <button class="month-pill ${filterStart && filterStart.getMonth()===m.month && filterStart.getFullYear()===m.year && activeMonth!==null ? 'active' : ''}"
-            onclick="setMonth(${m.year},${m.month})"
-            id="pill-${m.key}">${monthNames[m.month]} ${m.year !== new Date().getFullYear() ? m.year : ''}
-          </button>`).join('')}
-        <button class="month-pill ${activeMonth === null ? 'active' : ''}" onclick="setAllTime()">All</button>
-      </div>
-      <div class="date-divider"></div>
-      <div class="custom-range">
-        <input type="date" id="date-start" value="${startVal}" />
-        <span style="font-size:12px;color:var(--text3);">to</span>
-        <input type="date" id="date-end" value="${endVal}" />
-        <button class="apply-btn" onclick="applyCustomRange()">Apply</button>
-      </div>
-    </div>
+    ${renderDateBarHTML()}
 
     <div class="summary-cards">
       <div class="summary-card highlight">
@@ -675,7 +701,7 @@ function setMonth(year, month) {
   filterStart = new Date(year, month, 1);
   filterEnd = new Date(year, month + 1, 0);
   activeMonth = month;
-  renderOverview();
+  renderCurrentTab();
 }
 
 function setAllTime() {
@@ -684,7 +710,7 @@ function setAllTime() {
   filterStart = new Date(Math.min(...dates));
   filterEnd = new Date(Math.max(...dates));
   activeMonth = null;
-  renderOverview();
+  renderCurrentTab();
 }
 
 function applyCustomRange() {
@@ -694,7 +720,183 @@ function applyCustomRange() {
   filterStart = new Date(s + 'T00:00:00');
   filterEnd = new Date(e + 'T23:59:59');
   activeMonth = null;
-  renderOverview();
+  renderCurrentTab();
+}
+
+// Shared date-bar markup used by both Overview and By Account tabs
+function renderDateBarHTML() {
+  const months = getMonthsInData();
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const startVal = filterStart ? filterStart.toISOString().slice(0,10) : '';
+  const endVal = filterEnd ? filterEnd.toISOString().slice(0,10) : '';
+  return `
+    <div class="date-bar">
+      <span class="date-bar-label">Period:</span>
+      <div class="month-pills">
+        ${months.map(m => `
+          <button class="month-pill ${filterStart && filterStart.getMonth()===m.month && filterStart.getFullYear()===m.year && activeMonth!==null ? 'active' : ''}"
+            onclick="setMonth(${m.year},${m.month})"
+            id="pill-${m.key}">${monthNames[m.month]} ${m.year !== new Date().getFullYear() ? m.year : ''}
+          </button>`).join('')}
+        <button class="month-pill ${activeMonth === null ? 'active' : ''}" onclick="setAllTime()">All</button>
+      </div>
+      <div class="date-divider"></div>
+      <div class="custom-range">
+        <input type="date" id="date-start" value="${startVal}" />
+        <span style="font-size:12px;color:var(--text3);">to</span>
+        <input type="date" id="date-end" value="${endVal}" />
+        <button class="apply-btn" onclick="applyCustomRange()">Apply</button>
+      </div>
+    </div>`;
+}
+
+// BY ACCOUNT
+function renderByAccount() {
+  const oldTooltip = document.getElementById('chart-tooltip');
+  if (oldTooltip) oldTooltip.classList.remove('show');
+
+  const accounts = [...new Set(allTransactions.map(t=>t['Account']).filter(Boolean))].sort();
+  if (!byAcctSelected || !accounts.includes(byAcctSelected)) byAcctSelected = accounts[0] || null;
+
+  const txns = getFilteredTxns().filter(t => t['Account'] === byAcctSelected && t['Trans Type'] === 'Expense');
+  const catMap = {};
+  txns.forEach(t => {
+    const cat = (t['Parent Category'] || t['Category'] || 'Other').toString().trim() || 'Other';
+    catMap[cat] = (catMap[cat]||0) - (parseFloat(t['Amount'])||0);
+  });
+
+  let entries = Object.entries(catMap).filter(([,v]) => v > 0).sort((a,b)=>b[1]-a[1]);
+  const MAX_SLICES = 7;
+  if (entries.length > MAX_SLICES) {
+    const head = entries.slice(0, MAX_SLICES - 1);
+    const tailSum = entries.slice(MAX_SLICES - 1).reduce((s,[,v])=>s+v, 0);
+    const existingOther = head.find(([k]) => k === 'Other');
+    if (existingOther) { existingOther[1] += tailSum; entries = head; }
+    else { entries = [...head, ['Other', tailSum]]; }
+    entries.sort((a,b)=>b[1]-a[1]);
+  }
+  const total = entries.reduce((s,[,v])=>s+v, 0);
+
+  document.getElementById('main-content').innerHTML = `
+    ${renderDateBarHTML()}
+    <div class="dash-panel" style="margin-bottom:24px;">
+      <div class="acct-panel-head">
+        <h3 style="margin-bottom:0;">Spending by Category</h3>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <select class="filter-select" id="byacct-select" onchange="byAcctChange(this.value)">
+            ${accounts.map(a => `<option value="${a}" ${a===byAcctSelected?'selected':''}>${a}</option>`).join('')}
+          </select>
+          ${entries.length ? `<button class="view-toggle-btn" onclick="toggleAcctView()">${byAcctViewMode === 'chart' ? 'View as table' : 'View as chart'}</button>` : ''}
+        </div>
+      </div>
+      ${!byAcctSelected || entries.length === 0
+        ? `<p style="color:var(--text3);font-size:13px;">No expense data for ${byAcctSelected || 'this account'} in this period.</p>`
+        : byAcctViewMode === 'chart' ? renderDonutChart(entries, total) : renderAcctTable(entries, total)}
+    </div>
+  `;
+
+  if (entries.length) {
+    if (byAcctViewMode === 'chart') {
+      const legendLabels = document.querySelectorAll('#donut-legend .legend-label');
+      entries.forEach(([cat], i) => { if (legendLabels[i]) legendLabels[i].textContent = cat; });
+      attachDonutTooltips(entries, total);
+    } else {
+      document.querySelectorAll('.acct-table-cat').forEach(el => { entries[+el.dataset.idx] && (el.textContent = entries[+el.dataset.idx][0]); });
+    }
+  }
+}
+
+function byAcctChange(v) { byAcctSelected = v; renderByAccount(); }
+function toggleAcctView() { byAcctViewMode = byAcctViewMode === 'chart' ? 'table' : 'chart'; renderByAccount(); }
+
+function renderDonutChart(entries, total) {
+  const size = 220, r = 80, cx = size/2, cy = size/2, thickness = 30;
+  const circumference = 2 * Math.PI * r;
+  const gap = entries.length > 1 ? 3 : 0;
+  let offset = 0;
+  const segs = entries.map(([cat, val], i) => {
+    const frac = val / total;
+    const arcLen = frac * circumference;
+    const dash = Math.max(arcLen - gap, 0);
+    const dashOffset = -offset;
+    offset += arcLen;
+    return `<circle class="donut-seg" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${categoryColor(cat)}"
+      stroke-width="${thickness}" stroke-dasharray="${dash} ${circumference - dash}" stroke-dashoffset="${dashOffset}"
+      data-idx="${i}"></circle>`;
+  }).join('');
+
+  const legend = entries.map(([cat, val]) => `
+    <div class="legend-row">
+      <span class="legend-swatch" style="background:${categoryColor(cat)}"></span>
+      <span class="legend-label"></span>
+      <span class="legend-val">${fmt(val)}</span>
+      <span class="legend-pct">${((val/total)*100).toFixed(0)}%</span>
+    </div>`).join('');
+
+  return `
+    <div class="donut-layout">
+      <div class="donut-svg-wrap">
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
+          ${segs}
+        </svg>
+        <div class="donut-center">
+          <div class="donut-center-value">${fmt(total)}</div>
+          <div class="donut-center-label">Total</div>
+        </div>
+      </div>
+      <div class="donut-legend" id="donut-legend">${legend}</div>
+    </div>`;
+}
+
+function renderAcctTable(entries, total) {
+  return `
+    <div class="acct-table-wrap table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Amount</th><th>% of Total</th></tr></thead>
+        <tbody id="acct-table-body">
+          ${entries.map((_, i) => `
+            <tr>
+              <td><span class="legend-swatch" style="display:inline-block;vertical-align:middle;margin-right:8px;background:${categoryColor(entries[i][0])}"></span><span class="acct-table-cat" data-idx="${i}"></span></td>
+              <td>${fmt(entries[i][1])}</td>
+              <td>${((entries[i][1]/total)*100).toFixed(1)}%</td>
+            </tr>`).join('')}
+          <tr>
+            <td style="font-weight:500;color:var(--text);">Total</td>
+            <td style="font-weight:500;color:var(--text);">${fmt(total)}</td>
+            <td>100%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function attachDonutTooltips(entries, total) {
+  let tooltip = document.getElementById('chart-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'chart-tooltip';
+    tooltip.className = 'chart-tooltip';
+    document.body.appendChild(tooltip);
+  }
+  document.querySelectorAll('.donut-seg').forEach(seg => {
+    const [cat, val] = entries[+seg.dataset.idx];
+    const pct = ((val/total)*100).toFixed(1);
+    const show = e => {
+      tooltip.innerHTML = '';
+      const valEl = document.createElement('div');
+      valEl.className = 'tt-val';
+      valEl.textContent = fmt(val);
+      const labelEl = document.createElement('div');
+      labelEl.textContent = `${cat} · ${pct}%`;
+      tooltip.appendChild(valEl);
+      tooltip.appendChild(labelEl);
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top = (e.clientY + 14) + 'px';
+      tooltip.classList.add('show');
+    };
+    seg.addEventListener('mousemove', show);
+    seg.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+  });
 }
 
 // TRANSACTIONS
